@@ -4,7 +4,28 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>HAWI — Order Your Ethiopian Favourites</title>
-    <meta name="description" content="Scan, browse and order authentic Ethiopian dishes at HAWI. Place your order directly to the kitchen." />
+    <meta name="description" content="Scan, browse and order authentic Ethiopian dishes at HAWI. Filter by food or drink, category and price, then send your order straight to the kitchen." />
+    <link id="my-favicon" rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='orange'/><text x='50' y='50' font-family='Arial, sans-serif' font-size='70' font-weight='bold' fill='white' text-anchor='middle' dominant-baseline='central'>H</text></svg>" type="image/svg+xml" />
+    <script>
+      const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+      function updateFavicon(bgColor, textContent) {
+        let textElement = "";
+        if (textContent !== " ") {
+          const safeText = textContent === "&" ? "&amp;" : textContent;
+          textElement = `<text x='50' y='50' font-family='Arial, sans-serif' font-size='70' font-weight='bold' fill='white' text-anchor='middle' dominant-baseline='central'>${safeText}</text>`;
+        }
+        const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='${bgColor}'/>${textElement}</svg>`;
+        document.getElementById("my-favicon").href = "data:image/svg+xml," + encodeURIComponent(svg);
+      }
+      async function runFaviconAnimation() {
+        const letters = "HAWI BAR & RESTAURANT".split("");
+        while (true) {
+          for (let i = 0; i < letters.length; i++) { updateFavicon("orange", letters[i]); await sleep(3000); }
+          updateFavicon("green", "E"); await sleep(5000);
+        }
+      }
+      runFaviconAnimation();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet" />
@@ -35,257 +56,336 @@
       .glass-nav { background: rgba(255,255,255,0.88); backdrop-filter: blur(16px); border-bottom: 1px solid #E5E7EB; }
       .card { background:#fff; border:1px solid #E5E7EB; border-radius:1rem; transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease; }
       .card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px -10px rgba(228,61,48,0.12); }
-      .reveal { opacity:0; transform: translateY(28px) scale(.985); transition: opacity .7s cubic-bezier(.2,.8,.2,1), transform .7s cubic-bezier(.2,.8,.2,1); will-change: opacity, transform; }
-      .reveal.in { opacity:1; transform:none; }
-      .float-slow { animation: floaty 7s ease-in-out infinite; }
-      @keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+      .chip { border-radius: 9999px; padding: .5rem .9rem; font-size: .78rem; font-weight: 700; border: 1px solid #E5E7EB; background: #fff; color: #777; display: inline-flex; align-items: center; gap: .35rem; transition: all .2s; white-space: nowrap; }
+      .chip:hover { border-color: #E43D30; color: #E43D30; }
+      .chip.on { background-image: linear-gradient(90deg,#E43D30,#F15A3C,#F97316); color: #fff; border-color: transparent; }
+      .scroll-x { overflow-x: auto; scrollbar-width: none; }
+      .scroll-x::-webkit-scrollbar { display: none; }
+      .badge-count { min-width: 1.25rem; height: 1.25rem; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; font-size: .625rem; font-weight: 800; padding: 0 .375rem; }
       @keyframes toastUp { from{opacity:0; transform:translate(-50%,20px)} to{opacity:1; transform:translate(-50%,0)} }
       .toast { animation: toastUp .25s ease-out; }
-      .spin { animation: spin 1s linear infinite; } @keyframes spin { to { transform: rotate(360deg) } }
-      @media (prefers-reduced-motion: reduce) { .reveal{opacity:1;transform:none;transition:none} .float-slow{animation:none} }
+      .kd { width: 1.6rem; height: 1.6rem; border-radius: 9999px; display: inline-grid; place-items: center; font-size: .68rem; font-weight: 900; }
     </style>
   </head>
-  <body class="min-h-screen">
-    <!-- NAV -->
+  <body class="pb-24">
+    <!-- HEADER -->
     <nav class="glass-nav fixed top-0 inset-x-0 z-40 h-20 flex items-center">
       <div class="mx-auto w-full max-w-6xl px-4 flex items-center justify-between">
         <div class="flex items-center gap-3">
           <div class="brand-grad w-11 h-11 rounded-2xl grid place-items-center text-white font-display text-lg">H</div>
           <div>
             <h1 class="text-lg leading-tight">HAWI</h1>
-            <p class="text-xs text-steel">Ethiopian Kitchen</p>
+            <p class="text-xs text-steel leading-tight">Ethiopian Kitchen</p>
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <span id="tableBadge" class="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-cool bg-white px-3 py-1.5 text-xs font-semibold text-charcoal">
-            <iconify-icon icon="lucide:armchair"></iconify-icon> Walk-in
-          </span>
-          <button id="cartBtn" class="relative brand-grad text-white font-bold rounded-xl px-4 py-2.5 text-sm flex items-center gap-2">
-            <iconify-icon icon="lucide:shopping-bag"></iconify-icon> Cart
-            <span id="cartCount" class="hidden absolute -top-2 -right-2 min-w-[22px] h-[22px] rounded-full bg-midnight text-white text-[11px] grid place-items-center px-1">0</span>
+          <span id="tableTag" class="rounded-xl border border-cool bg-white px-3 py-2.5 text-sm font-semibold flex items-center gap-2"><iconify-icon icon="lucide:map-pin"></iconify-icon> Walk-in</span>
+          <button id="cartBtn" class="brand-grad text-white font-bold rounded-xl px-4 py-2.5 text-sm flex items-center gap-2 hover:opacity-90 transition">
+            <iconify-icon icon="lucide:shopping-cart"></iconify-icon> Cart
+            <span id="cartCount" class="badge-count bg-white/25">0</span>
           </button>
         </div>
       </div>
     </nav>
 
     <!-- HERO -->
-    <header class="pt-28 pb-10 px-4">
-      <div class="mx-auto max-w-6xl reveal">
-        <div class="relative overflow-hidden rounded-[2rem] brand-grad text-white p-8 sm:p-12">
-          <div class="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-white/10 float-slow"></div>
-          <div class="absolute -left-8 bottom--8 w-32 h-32 rounded-full bg-white/10 float-slow" style="animation-delay:1.4s"></div>
-          <p class="text-white/85 text-sm font-semibold tracking-wide uppercase">Fresh from our kitchen</p>
-          <h2 class="mt-2 text-3xl sm:text-5xl max-w-xl leading-tight">Authentic Ethiopian flavours, ordered from your table.</h2>
-          <p class="mt-3 text-white/85 max-w-lg">Browse today's menu, build your order and send it straight to the kitchen.</p>
-        </div>
+    <header class="pt-28 pb-6">
+      <div class="mx-auto max-w-6xl px-4">
+        <p class="text-xs font-bold tracking-widest uppercase text-primary">Fresh from our kitchen</p>
+        <h2 class="text-3xl sm:text-4xl mt-2 leading-tight">Authentic Ethiopian flavours,<br class="hidden sm:block" /> ordered from your table.</h2>
+        <p class="text-sm text-steel mt-2">Browse today's menu, build your order and send it straight to the kitchen.</p>
       </div>
     </header>
 
-    <main class="mx-auto max-w-6xl px-4 pb-28">
-      <div id="pills" class="flex flex-wrap gap-2 mb-6 reveal"></div>
-      <div id="stateBox" class="hidden card p-10 text-center"></div>
-      <div id="grid" class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"></div>
+    <!-- FILTER BAR -->
+    <section class="mx-auto max-w-6xl px-4">
+      <div class="card p-4 space-y-3">
+        <!-- Food / Drink switch -->
+        <div id="kindBar" class="flex flex-wrap gap-2"></div>
+        <!-- Category buttons (pinned first) -->
+        <div id="catBar" class="flex flex-wrap gap-2"></div>
+
+        <!-- Search + icon toggles -->
+        <div class="flex gap-2">
+          <div class="relative flex-1">
+            <iconify-icon icon="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 text-steel"></iconify-icon>
+            <input id="q" placeholder="Search a dish or a price…" class="w-full rounded-xl border border-cool pl-9 pr-3 py-2.5 text-sm" />
+          </div>
+          <button id="priceBtn" class="w-11 h-11 shrink-0 rounded-xl border border-cool bg-white grid place-items-center hover:border-primary transition" title="Filter by price" aria-label="Filter by price"><iconify-icon icon="lucide:sliders-horizontal"></iconify-icon></button>
+          <button id="clearBtn" class="w-11 h-11 shrink-0 rounded-xl border border-cool bg-white grid place-items-center hover:border-primary transition" title="Clear filters" aria-label="Clear filters"><iconify-icon icon="lucide:rotate-ccw"></iconify-icon></button>
+        </div>
+        <!-- Price panel (hidden until the icon is tapped) -->
+        <div id="pricePanel" class="hidden rounded-xl border border-cool p-3 space-y-2">
+          <div id="priceChips" class="flex flex-wrap gap-2"></div>
+          <div class="flex items-center gap-2">
+            <input id="pMin" type="number" min="0" placeholder="Min ETB" class="w-28 rounded-xl border border-cool px-3 py-2 text-sm" />
+            <span class="text-steel text-sm">to</span>
+            <input id="pMax" type="number" min="0" placeholder="Max ETB" class="w-28 rounded-xl border border-cool px-3 py-2 text-sm" />
+            <button id="pApply" class="chip on">Apply</button>
+          </div>
+        </div>
+        <p id="resultInfo" class="text-xs text-steel"></p>
+      </div>
+    </section>
+
+    <!-- MENU -->
+    <main class="mx-auto max-w-6xl px-4 py-6">
+      <div id="menu" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
     </main>
 
     <!-- CART DRAWER -->
-    <div id="cartOverlay" class="hidden fixed inset-0 z-50 bg-midnight/40"></div>
-    <aside id="cartDrawer" class="fixed z-50 top-0 right-0 h-full w-full sm:w-[420px] bg-white border-l border-cool translate-x-full transition-transform duration-300 flex flex-col">
-      <div class="h-20 px-5 flex items-center justify-between border-b border-cool">
-        <h3 class="text-lg">Your Order</h3>
-        <button id="cartClose" class="w-10 h-10 rounded-xl border border-cool grid place-items-center"><iconify-icon icon="lucide:x"></iconify-icon></button>
-      </div>
-      <div id="cartItems" class="flex-1 overflow-y-auto p-5 space-y-3"></div>
-      <div class="border-t border-cool p-5 space-y-3">
-        <p class="text-xs text-steel text-center">Your order goes straight to the kitchen — pay the staff when you arrive.</p>
-        <div class="flex items-center justify-between text-sm text-steel"><span>Total</span><span id="cartTotal" class="text-xl font-display text-midnight">0.00 ETB</span></div>
-        <button id="placeOrderBtn" class="brand-grad w-full text-white font-bold rounded-xl py-3.5 disabled:opacity-40">Place Order</button>
-      </div>
-    </aside>
+    <div id="cartWrap" class="hidden fixed inset-0 z-50">
+      <div id="cartBack" class="absolute inset-0 bg-midnight/50"></div>
+      <aside class="absolute right-0 top-0 h-full w-full max-w-md bg-white flex flex-col">
+        <div class="flex items-center justify-between px-4 h-20 border-b border-cool">
+          <h3 class="text-lg">Your Order</h3>
+          <button id="cartClose" class="w-9 h-9 rounded-xl border border-cool grid place-items-center hover:bg-cloud transition"><iconify-icon icon="lucide:x"></iconify-icon></button>
+        </div>
+        <div id="cartItems" class="flex-1 overflow-y-auto p-4 space-y-3"></div>
+        <div class="border-t border-cool p-4 space-y-3">
+          <p class="text-xs text-steel">Your order goes straight to the kitchen — pay the staff when you arrive.</p>
+
+          <div class="flex items-center justify-between"><span class="font-semibold">Total</span><span id="cartTotal" class="font-display text-xl brand-text">0.00 ETB</span></div>
+          <p id="orderErr" class="hidden text-sm text-primary"></p>
+          <button id="placeOrder" class="brand-grad w-full text-white font-bold rounded-xl py-3.5 hover:opacity-90 transition">Place Order</button>
+        </div>
+      </aside>
+    </div>
 
     <div id="toasts" class="fixed z-[90] bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"></div>
 
     <script>
+      /* ---------- connection (same kitchen database as the manager app) ---------- */
       const SUPABASE_URL = "https://jqyrjrhwgintuxhsxpsu.supabase.co";
       const SUPABASE_KEY = "sb_publishable_i_TU_cb2C3TitU9wGAyHmw_cX5cPKMi";
       const H = { apikey: SUPABASE_KEY, Authorization: "Bearer " + SUPABASE_KEY };
+
       const $ = (s) => document.querySelector(s);
+      const $$ = (s) => document.querySelectorAll(s);
       const money = (n) => Number(n || 0).toFixed(2) + " ETB";
       const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+      const kindOf = (m) => (m && m.kind === "drink" ? "drink" : "food");
 
       function toast(msg, kind) {
         const el = document.createElement("div");
-        el.className = "toast rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-lg " + (kind === "error" ? "bg-primary" : "bg-midnight");
+        const bg = kind === "error" ? "bg-primary" : kind === "success" ? "bg-green-600" : "bg-midnight";
+        el.className = `toast rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-lg ${bg}`;
         el.textContent = msg;
         $("#toasts").appendChild(el);
-        setTimeout(() => el.remove(), 3000);
+        setTimeout(() => { el.style.opacity = "0"; el.style.transition = "opacity .3s"; setTimeout(() => el.remove(), 300); }, 3000);
       }
 
-      async function describeFailure(res, what) {
-        let body = "";
-        try { body = (await res.text()).slice(0, 220); } catch (_) {}
-        return `${what} — ${res.status} ${res.statusText}${body ? ": " + body : ""}`;
-      }
-
-      // ---------- scroll reveal ----------
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach((e, i) => { if (e.isIntersecting) { setTimeout(() => e.target.classList.add("in"), i * 60); io.unobserve(e.target); } });
-      }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
-      const observeReveals = () => document.querySelectorAll(".reveal:not(.in)").forEach((el) => io.observe(el));
-
-      // ---------- state ----------
+      /* ---------- table from the QR link ---------- */
       const params = new URLSearchParams(location.search);
-      const TABLE = params.get("table") || "";
-      let MENU = [], FILTER = "All", CART = {};
+      const TABLE = params.get("table") || params.get("t") || "";
+      if (TABLE) $("#tableTag").innerHTML = `<iconify-icon icon="lucide:map-pin"></iconify-icon> Table ${esc(TABLE)}`;
 
-      if (TABLE) {
-        const b = $("#tableBadge");
-        b.classList.remove("hidden");
-        b.innerHTML = '<iconify-icon icon="lucide:armchair"></iconify-icon> Table ' + esc(TABLE);
-      }
+      /* ---------- state ---------- */
+      let ITEMS = [];
+      let CATS = [];      // [{name, pinned}]
+      const CART = new Map();
+      const PRICE_BANDS = [
+        { id: "u200", label: "Under 200", icon: "lucide:coins", min: 0, max: 200 },
+        { id: "200500", label: "200 – 500", icon: "lucide:coins", min: 200, max: 500 },
+        { id: "5001000", label: "500 – 1000", icon: "lucide:banknote", min: 500, max: 1000 },
+        { id: "o1000", label: "Over 1000", icon: "lucide:gem", min: 1000, max: Infinity },
+      ];
+      const F = { kind: "all", cat: "all", q: "", band: null, min: null, max: null };
 
-      function showState(icon, title, text, tone) {
-        $("#grid").innerHTML = "";
-        const box = $("#stateBox");
-        box.classList.remove("hidden");
-        box.innerHTML = `<div class="mx-auto w-14 h-14 rounded-2xl grid place-items-center text-2xl ${tone === "error" ? "bg-primary/10 text-primary" : "bg-cloud text-steel"}"><iconify-icon icon="${icon}" class="${icon.includes("loader") ? "spin" : ""}"></iconify-icon></div>
-          <h3 class="mt-4 text-lg">${esc(title)}</h3><p class="mt-1 text-sm text-steel">${esc(text)}</p>`;
-      }
-
-      async function loadMenu() {
-        showState("lucide:loader-2", "Loading today's menu", "One moment please…");
-        let rows;
+      /* ---------- load ---------- */
+      async function loadAll() {
+        $("#menu").innerHTML = `<p class="text-sm text-steel">Loading today's menu…</p>`;
         try {
-          const res = await fetch(`${SUPABASE_URL}/rest/v1/menus?select=*&is_active_today=eq.true&order=category.asc,name.asc`, { headers: H });
-          if (!res.ok) throw new Error(await describeFailure(res, "Could not load the menu"));
-          rows = await res.json();
-        } catch (err) {
-          showState("lucide:wifi-off", "Menu unavailable", err.message || "Network request failed — please check your connection.", "error");
+          const [mRes, cRes] = await Promise.all([
+            fetch(`${SUPABASE_URL}/rest/v1/menus?select=*&is_active_today=eq.true&order=created_at.desc`, { headers: H }),
+            fetch(`${SUPABASE_URL}/rest/v1/menu_categories?select=*&order=sort_order.asc,name.asc`, { headers: H }),
+          ]);
+          ITEMS = mRes.ok ? await mRes.json() : [];
+          const rows = cRes.ok ? await cRes.json() : [];
+          const fromItems = [...new Set(ITEMS.map((m) => m.category).filter(Boolean))];
+          CATS = rows.length
+            ? rows.map((r) => ({ name: r.name, pinned: !!r.pinned }))
+            : fromItems.map((n) => ({ name: n, pinned: false }));
+          fromItems.forEach((n) => { if (!CATS.some((c) => c.name.toLowerCase() === n.toLowerCase())) CATS.push({ name: n, pinned: false }); });
+        } catch (e) {
+          $("#menu").innerHTML = `<p class="text-sm text-primary">Could not load the menu. Please refresh.</p>`;
           return;
         }
-        MENU = Array.isArray(rows) ? rows : [];
-        if (!MENU.length) { $("#pills").innerHTML = ""; showState("lucide:utensils", "No dishes yet", "The kitchen hasn't published today's menu. Please check back shortly."); return; }
-        $("#stateBox").classList.add("hidden");
-        renderPills();
-        renderGrid();
+        renderBars();
+        renderMenu();
       }
 
-      function renderPills() {
-        const cats = ["All", ...Array.from(new Set(MENU.map((m) => m.category).filter(Boolean)))];
-        $("#pills").innerHTML = cats.map((c) => {
-          const on = c === FILTER;
-          return `<button data-cat="${esc(c)}" class="rounded-full px-4 py-2 text-sm font-semibold transition ${on ? "brand-grad text-white" : "bg-white border border-cool text-charcoal hover:border-coral"}">${esc(c)}</button>`;
-        }).join("");
-        $("#pills").querySelectorAll("button").forEach((b) => b.onclick = () => { FILTER = b.dataset.cat; renderPills(); renderGrid(); });
+      /* ---------- filters ---------- */
+      function filtered() {
+        const q = F.q.trim().toLowerCase();
+        return ITEMS.filter((m) => {
+          if (F.kind !== "all" && kindOf(m) !== F.kind) return false;
+          if (F.cat !== "all" && String(m.category || "").toLowerCase() !== F.cat.toLowerCase()) return false;
+          const price = Number(m.price || 0);
+          if (F.min != null && price < F.min) return false;
+          if (F.max != null && price > F.max) return false;
+          if (!q) return true;
+          return (
+            String(m.name || "").toLowerCase().includes(q) ||
+            String(m.description || "").toLowerCase().includes(q) ||
+            String(m.category || "").toLowerCase().includes(q) ||
+            String(price).includes(q) || price.toFixed(2).includes(q)
+          );
+        });
       }
 
-      function renderGrid() {
-        const items = FILTER === "All" ? MENU : MENU.filter((m) => m.category === FILTER);
-        $("#grid").innerHTML = items.map((m) => {
-          const qty = CART[m.id]?.qty || 0;
-          const img = m.image_url
-            ? `<img src="${esc(m.image_url)}" alt="${esc(m.name)}" loading="lazy" class="w-full h-44 object-cover" onerror="this.style.display='none';this.nextElementSibling.style.display='grid'"><div style="display:none" class="w-full h-44 place-items-center bg-cloud text-steel text-3xl"><iconify-icon icon="lucide:image-off"></iconify-icon></div>`
-            : `<div class="w-full h-44 grid place-items-center bg-cloud text-steel text-3xl"><iconify-icon icon="lucide:utensils-crossed"></iconify-icon></div>`;
-          return `<article class="card reveal overflow-hidden flex flex-col">
-            <div class="relative">${img}<span class="absolute top-3 left-3 rounded-full bg-white/95 border border-cool px-2.5 py-1 text-[11px] font-bold text-charcoal">${esc(m.category || "Dish")}</span></div>
-            <div class="p-5 flex flex-col gap-2 flex-1">
-              <h3 class="text-base">${esc(m.name)}</h3>
-              <p class="text-sm text-steel line-clamp-2 flex-1">${esc(m.description || "")}</p>
-              <div class="flex items-center justify-between pt-2">
+      function renderBars() {
+        const count = (fn) => ITEMS.filter(fn).length;
+        $("#kindBar").innerHTML = `
+          <button data-kind="all" class="chip ${F.kind === "all" ? "on" : ""}"><iconify-icon icon="lucide:layout-grid"></iconify-icon> All (${ITEMS.length})</button>
+          <button data-kind="food" class="chip ${F.kind === "food" ? "on" : ""}"><iconify-icon icon="lucide:utensils"></iconify-icon> Food (${count((m) => kindOf(m) === "food")})</button>
+          <button data-kind="drink" class="chip ${F.kind === "drink" ? "on" : ""}"><iconify-icon icon="lucide:cup-soda"></iconify-icon> Drinks (${count((m) => kindOf(m) === "drink")})</button>`;
+
+        const ordered = CATS.slice().sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0));
+        $("#catBar").innerHTML = `<button data-cat="all" class="chip ${F.cat === "all" ? "on" : ""}"><iconify-icon icon="lucide:list"></iconify-icon> All</button>` +
+          ordered.map((c) => {
+            const n = count((m) => String(m.category || "").toLowerCase() === c.name.toLowerCase());
+            if (!n && !c.pinned) return "";
+            return `<button data-cat="${esc(c.name)}" class="chip ${F.cat.toLowerCase() === c.name.toLowerCase() ? "on" : ""}">${c.pinned ? '<iconify-icon icon="lucide:star"></iconify-icon>' : ""}${esc(c.name)} (${n})</button>`;
+          }).join("");
+
+        $("#priceChips").innerHTML = PRICE_BANDS.map((b) => `<button data-band="${b.id}" class="chip ${F.band === b.id ? "on" : ""}"><iconify-icon icon="${b.icon}"></iconify-icon> ${b.label}</button>`).join("");
+
+        $$("#kindBar [data-kind]").forEach((b) => b.onclick = () => { F.kind = b.dataset.kind; renderBars(); renderMenu(); });
+        $$("#catBar [data-cat]").forEach((b) => b.onclick = () => { F.cat = b.dataset.cat; renderBars(); renderMenu(); });
+        $$("#priceChips [data-band]").forEach((b) => b.onclick = () => {
+          const band = PRICE_BANDS.find((x) => x.id === b.dataset.band);
+          if (F.band === band.id) { F.band = null; F.min = null; F.max = null; }
+          else { F.band = band.id; F.min = band.min; F.max = band.max === Infinity ? null : band.max; }
+          $("#pMin").value = ""; $("#pMax").value = "";
+          renderBars(); renderMenu();
+        });
+      }
+
+      function renderMenu() {
+        const rows = filtered();
+        $("#resultInfo").textContent = `${rows.length} of ${ITEMS.length} dishes shown`;
+        $("#menu").innerHTML = rows.length ? rows.map((m) => {
+          const k = kindOf(m);
+          const inCart = CART.get(m.id);
+          return `
+          <article class="card overflow-hidden flex flex-col">
+            ${m.image_url ? `<img src="${esc(m.image_url)}" alt="${esc(m.name)}" loading="lazy" class="w-full h-40 object-cover" onerror="this.remove()">` : ""}
+            <div class="p-4 flex-1 flex flex-col">
+              <div class="flex items-start gap-2">
+                <span class="kd ${k === "drink" ? "bg-blue-600/15 text-blue-700" : "bg-primary/10 text-primary"}" title="${k === "drink" ? "Drink" : "Food"}">${k === "drink" ? "D" : "F"}</span>
+                <div class="flex-1">
+                  <h3 class="text-base leading-tight">${esc(m.name)}</h3>
+                  <p class="text-xs text-steel">${esc(m.category || "")}</p>
+                </div>
+              </div>
+              <p class="text-sm text-steel mt-2 line-clamp-2">${esc(m.description || "")}</p>
+              <div class="mt-3 flex items-center justify-between gap-2">
                 <span class="font-display text-lg brand-text">${money(m.price)}</span>
-                ${qty ? `<div class="flex items-center gap-2">
-                    <button data-dec="${m.id}" class="w-9 h-9 rounded-xl border border-cool grid place-items-center"><iconify-icon icon="lucide:minus"></iconify-icon></button>
-                    <span class="w-6 text-center font-bold">${qty}</span>
-                    <button data-inc="${m.id}" class="w-9 h-9 rounded-xl brand-grad text-white grid place-items-center"><iconify-icon icon="lucide:plus"></iconify-icon></button>
-                  </div>`
-                  : `<button data-add="${m.id}" class="brand-grad text-white font-bold rounded-xl px-4 py-2 text-sm flex items-center gap-1.5"><iconify-icon icon="lucide:plus"></iconify-icon> Add</button>`}
+                <button data-add="${m.id}" class="brand-grad text-white font-bold rounded-xl px-3.5 py-2 text-sm flex items-center gap-1.5 hover:opacity-90 transition">
+                  <iconify-icon icon="lucide:plus"></iconify-icon> ${inCart ? "Add (" + inCart.qty + ")" : "Add"}
+                </button>
               </div>
             </div>
           </article>`;
-        }).join("");
-        $("#grid").querySelectorAll("[data-add]").forEach((b) => b.onclick = () => changeQty(b.dataset.add, 1, true));
-        $("#grid").querySelectorAll("[data-inc]").forEach((b) => b.onclick = () => changeQty(b.dataset.inc, 1));
-        $("#grid").querySelectorAll("[data-dec]").forEach((b) => b.onclick = () => changeQty(b.dataset.dec, -1));
-        observeReveals();
+        }).join("") : `<div class="card p-10 text-center sm:col-span-2 lg:col-span-3">
+            <div class="mx-auto w-14 h-14 rounded-2xl bg-cloud grid place-items-center text-steel text-2xl"><iconify-icon icon="lucide:search-x"></iconify-icon></div>
+            <h3 class="mt-4 text-lg">Nothing matches</h3>
+            <p class="text-sm text-steel mt-1">Try another category, food/drink or price range.</p>
+          </div>`;
+        $$("#menu [data-add]").forEach((b) => b.onclick = () => addToCart(b.dataset.add));
       }
 
-      function changeQty(id, delta, announce) {
-        const item = MENU.find((m) => m.id === id);
-        if (!item) return;
-        const cur = CART[id]?.qty || 0;
-        const next = cur + delta;
-        if (next <= 0) delete CART[id];
-        else CART[id] = { id: item.id, name: item.name, price: Number(item.price), qty: next };
-        if (announce) toast(item.name + " added to cart");
-        renderGrid(); renderCart();
-      }
-
-      const cartList = () => Object.values(CART);
-      const cartTotal = () => cartList().reduce((s, i) => s + i.price * i.qty, 0);
-
-      function renderCart() {
-        const items = cartList();
-        const c = $("#cartCount");
-        const count = items.reduce((s, i) => s + i.qty, 0);
-        c.textContent = count; c.classList.toggle("hidden", count === 0);
-        $("#cartTotal").textContent = money(cartTotal());
-        $("#placeOrderBtn").disabled = items.length === 0;
-        $("#cartItems").innerHTML = items.length
-          ? items.map((i) => `<div class="card p-4 flex items-center gap-3">
-              <div class="flex-1"><p class="font-semibold text-sm">${esc(i.name)}</p><p class="text-xs text-steel">${money(i.price)} each</p></div>
-              <div class="flex items-center gap-2">
-                <button data-cdec="${i.id}" class="w-8 h-8 rounded-lg border border-cool grid place-items-center"><iconify-icon icon="lucide:minus"></iconify-icon></button>
-                <span class="w-5 text-center text-sm font-bold">${i.qty}</span>
-                <button data-cinc="${i.id}" class="w-8 h-8 rounded-lg brand-grad text-white grid place-items-center"><iconify-icon icon="lucide:plus"></iconify-icon></button>
-              </div>
-              <span class="w-24 text-right text-sm font-display">${money(i.price * i.qty)}</span>
-            </div>`).join("")
-          : `<div class="text-center py-16 text-steel text-sm"><div class="text-4xl mb-2"><iconify-icon icon="lucide:shopping-bag"></iconify-icon></div>Your cart is empty.</div>`;
-        $("#cartItems").querySelectorAll("[data-cinc]").forEach((b) => b.onclick = () => changeQty(b.dataset.cinc, 1));
-        $("#cartItems").querySelectorAll("[data-cdec]").forEach((b) => b.onclick = () => changeQty(b.dataset.cdec, -1));
-      }
-
-      function openCart(open) {
-        $("#cartDrawer").classList.toggle("translate-x-full", !open);
-        $("#cartOverlay").classList.toggle("hidden", !open);
-      }
-      $("#cartBtn").onclick = () => openCart(true);
-      $("#cartClose").onclick = () => openCart(false);
-      $("#cartOverlay").onclick = () => openCart(false);
-
-      // ---------- place order directly (no payment, no scheduling) ----------
-      $("#placeOrderBtn").onclick = async () => {
-        const items = cartList();
-        if (!items.length) return;
-        const btn = $("#placeOrderBtn");
-        btn.disabled = true; btn.textContent = "Sending order…";
-        try {
-          const payload = {
-            table_number: TABLE || "Walk-in",
-            items: items,
-            total_amount: Number(cartTotal().toFixed(2)),
-            status: "received",
-          };
-          const ins = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
-            method: "POST",
-            headers: { ...H, "Content-Type": "application/json", Prefer: "return=representation" },
-            body: JSON.stringify(payload),
-          });
-          if (!ins.ok) throw new Error(await describeFailure(ins, "Could not submit your order"));
-        } catch (err) {
-          btn.disabled = false; btn.textContent = "Place Order";
-          toast(err.message || "Order could not be submitted", "error");
-          return;
-        }
-        btn.disabled = false; btn.textContent = "Place Order";
-        CART = {};
-        openCart(false);
-        renderCart(); renderGrid();
-        toast("Order placed — thank you!");
+      /* ---------- search & price controls ---------- */
+      $("#q").oninput = (e) => { F.q = e.target.value; renderMenu(); };
+      $("#priceBtn").onclick = () => $("#pricePanel").classList.toggle("hidden");
+      $("#pApply").onclick = () => {
+        const min = $("#pMin").value === "" ? null : Number($("#pMin").value);
+        const max = $("#pMax").value === "" ? null : Number($("#pMax").value);
+        F.min = min; F.max = max; F.band = null;
+        renderBars(); renderMenu();
+      };
+      $("#clearBtn").onclick = () => {
+        F.kind = "all"; F.cat = "all"; F.q = ""; F.band = null; F.min = null; F.max = null;
+        $("#q").value = ""; $("#pMin").value = ""; $("#pMax").value = "";
+        renderBars(); renderMenu();
       };
 
+      /* ---------- cart ---------- */
+      function addToCart(id) {
+        const m = ITEMS.find((x) => x.id === id);
+        if (!m) return;
+        const cur = CART.get(id);
+        CART.set(id, { id, name: m.name, price: Number(m.price || 0), image: m.image_url || "", qty: cur ? cur.qty + 1 : 1 });
+
+        toast(`${m.name} added`, "success");
+        renderCart(); renderMenu();
+      }
+      function setQty(id, qty) {
+        if (qty <= 0) CART.delete(id);
+        else { const it = CART.get(id); it.qty = qty; CART.set(id, it); }
+        renderCart(); renderMenu();
+      }
+      const cartTotal = () => [...CART.values()].reduce((s, i) => s + i.price * i.qty, 0);
+      function renderCart() {
+        const items = [...CART.values()];
+        $("#cartCount").textContent = items.reduce((s, i) => s + i.qty, 0);
+        $("#cartTotal").textContent = money(cartTotal());
+        $("#cartItems").innerHTML = items.length ? items.map((i) => `
+          <div class="flex items-center gap-3 border border-cool rounded-xl p-3">
+            ${i.image
+              ? `<img src="${esc(i.image)}" alt="${esc(i.name)}" class="w-14 h-14 rounded-xl object-cover shrink-0" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'w-14 h-14 rounded-xl bg-cloud shrink-0'}))">`
+              : `<div class="w-14 h-14 rounded-xl bg-cloud grid place-items-center text-steel shrink-0"><iconify-icon icon="lucide:utensils"></iconify-icon></div>`}
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-semibold truncate">${esc(i.name)}</p>
+              <p class="text-xs text-steel">${money(i.price)} × ${i.qty} = <span class="font-semibold brand-text">${money(i.price * i.qty)}</span></p>
+            </div>
+
+            <div class="flex items-center gap-1">
+              <button data-minus="${i.id}" class="w-8 h-8 rounded-lg border border-cool grid place-items-center"><iconify-icon icon="lucide:minus"></iconify-icon></button>
+              <span class="w-7 text-center text-sm font-bold">${i.qty}</span>
+              <button data-plus="${i.id}" class="w-8 h-8 rounded-lg border border-cool grid place-items-center"><iconify-icon icon="lucide:plus"></iconify-icon></button>
+            </div>
+          </div>`).join("") : `<p class="text-sm text-steel">Your cart is empty.</p>`;
+        $$("#cartItems [data-minus]").forEach((b) => b.onclick = () => setQty(b.dataset.minus, CART.get(b.dataset.minus).qty - 1));
+        $$("#cartItems [data-plus]").forEach((b) => b.onclick = () => setQty(b.dataset.plus, CART.get(b.dataset.plus).qty + 1));
+      }
+      $("#cartBtn").onclick = () => { renderCart(); $("#cartWrap").classList.remove("hidden"); };
+      $("#cartClose").onclick = () => $("#cartWrap").classList.add("hidden");
+      $("#cartBack").onclick = () => $("#cartWrap").classList.add("hidden");
+
+      $("#placeOrder").onclick = async () => {
+        const err = $("#orderErr");
+        err.classList.add("hidden");
+        const items = [...CART.values()].map((i) => ({ id: i.id, name: i.name, qty: i.qty, price: i.price, image_url: i.image || null }));
+        if (!items.length) { err.textContent = "Add at least one dish first."; err.classList.remove("hidden"); return; }
+        const btn = $("#placeOrder"); btn.disabled = true; btn.textContent = "Sending…";
+        try {
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/orders`, {
+            method: "POST",
+            headers: { ...H, "Content-Type": "application/json" },
+            body: JSON.stringify({
+              table_number: TABLE || "Walk-in",
+              items,
+
+              total_amount: cartTotal(),
+              status: "pending",
+            }),
+          });
+          if (!res.ok) throw new Error((await res.text()).slice(0, 160) || "Could not place the order");
+          CART.clear(); renderCart(); renderMenu();
+          $("#cartWrap").classList.add("hidden");
+          toast("Order sent to the kitchen!", "success");
+        } catch (e) {
+          err.textContent = e.message; err.classList.remove("hidden");
+        } finally {
+          btn.disabled = false; btn.textContent = "Place Order";
+        }
+      };
+
+      loadAll();
       renderCart();
-      observeReveals();
-      loadMenu();
+      setInterval(loadAll, 60000);
     </script>
   </body>
 </html>
