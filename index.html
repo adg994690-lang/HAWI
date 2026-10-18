@@ -117,7 +117,7 @@
         box-shadow: 0 20px 40px -10px rgba(228, 61, 48, 0.12);
       }
 
-      /* Hero panel matching the second menu page */
+      /* Hero panel */
       .herobox {
         position: relative;
         overflow: hidden;
@@ -169,7 +169,7 @@
         max-width: 520px;
       }
 
-      /* Category chips styled to match the second menu page */
+      /* Category chips */
       .chip {
         border-radius: 9999px;
         padding: 8px 16px;
@@ -194,6 +194,16 @@
         background-image: linear-gradient(90deg, #E43D30, #F15A3C, #F97316);
         color: #fff;
         border-color: transparent;
+      }
+
+      /* Search icon button matching the pickup website */
+      .search-toggle {
+        color: #E43D30;
+      }
+
+      .search-toggle.on {
+        color: #fff;
+        background-image: linear-gradient(90deg, #E43D30, #F15A3C, #F97316);
       }
 
       @media (max-width: 640px) {
@@ -240,7 +250,7 @@
         animation: toastUp .25s ease-out;
       }
 
-      /* Food/drink indicators: black line icons with no badge background. */
+      /* Black Food/Drink icons with no background */
       .kd {
         width: 1.6rem;
         height: 1.6rem;
@@ -259,7 +269,7 @@
         line-height: 1;
       }
 
-      /* Translucent category label overlay on each menu image. */
+      /* Category label overlay on each menu image */
       .menu-image-wrap {
         position: relative;
         overflow: hidden;
@@ -286,7 +296,7 @@
         line-height: 1.4;
       }
 
-      /* ---------- fixed developer attribution ---------- */
+      /* Developer attribution */
       .footer-attribution-row {
         position: fixed;
         right: max(12px, calc((100vw - 72rem) / 2 + 16px));
@@ -538,7 +548,7 @@
       </div>
     </nav>
 
-    <!-- HERO: gradient panel matching the second menu page -->
+    <!-- HERO -->
     <header class="pt-28 pb-10">
       <div class="mx-auto max-w-6xl px-4">
         <div class="herobox brand-grad">
@@ -559,21 +569,33 @@
     </header>
 
     <!-- FILTER BAR -->
-    <!-- Category chips are separated like the second page.
-         The original search and price controls remain below. -->
     <section class="mx-auto max-w-6xl px-4">
       <div class="mb-4 space-y-3">
         <!-- Food / Drink switch -->
         <div id="kindBar" class="flex flex-wrap gap-2"></div>
 
-        <!-- Category buttons, pinned categories first -->
-        <div id="catBar" class="flex flex-wrap gap-2"></div>
+        <!-- Category chips with standalone search icon -->
+        <div class="flex items-start gap-2">
+          <div id="catBar" class="flex flex-1 min-w-0 flex-wrap gap-2"></div>
+
+          <button
+            id="searchToggle"
+            type="button"
+            class="search-toggle w-10 h-10 shrink-0 rounded-xl grid place-items-center transition hover:bg-primary/10"
+            title="Search and filter menu"
+            aria-label="Show search and price filters"
+            aria-expanded="false"
+            aria-controls="searchPanel"
+          >
+            <iconify-icon icon="lucide:search" class="text-xl"></iconify-icon>
+          </button>
+        </div>
       </div>
 
-      <!-- Original search box and price controls are retained -->
-      <div class="card p-4 space-y-3">
-        <div class="flex gap-2">
-          <div class="relative flex-1">
+      <!-- Search and all price filters are hidden until the search icon is clicked -->
+      <div id="searchPanel" class="hidden card p-4 space-y-3 mb-4">
+        <div class="flex items-center gap-2">
+          <div class="relative flex-1 min-w-0">
             <iconify-icon icon="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 text-steel"></iconify-icon>
 
             <input
@@ -584,16 +606,8 @@
           </div>
 
           <button
-            id="priceBtn"
-            class="w-11 h-11 shrink-0 rounded-xl border border-cool bg-white grid place-items-center hover:border-primary transition"
-            title="Filter by price"
-            aria-label="Filter by price"
-          >
-            <iconify-icon icon="lucide:sliders-horizontal"></iconify-icon>
-          </button>
-
-          <button
             id="clearBtn"
+            type="button"
             class="w-11 h-11 shrink-0 rounded-xl border border-cool bg-white grid place-items-center hover:border-primary transition"
             title="Clear filters"
             aria-label="Clear filters"
@@ -602,31 +616,33 @@
           </button>
         </div>
 
-        <!-- Price panel, hidden until the filter icon is tapped -->
-        <div id="pricePanel" class="hidden rounded-xl border border-cool p-3 space-y-2">
+        <div class="space-y-2">
+          <p class="text-xs font-bold text-steel">Filter by price</p>
           <div id="priceChips" class="flex flex-wrap gap-2"></div>
+        </div>
 
-          <div class="flex items-center gap-2">
-            <input
-              id="pMin"
-              type="number"
-              min="0"
-              placeholder="Min ETB"
-              class="w-28 rounded-xl border border-cool px-3 py-2 text-sm"
-            />
+        <div class="flex flex-wrap items-center gap-2">
+          <input
+            id="pMin"
+            type="number"
+            min="0"
+            placeholder="Min ETB"
+            aria-label="Minimum price in ETB"
+            class="w-28 rounded-xl border border-cool px-3 py-2 text-sm"
+          />
 
-            <span class="text-steel text-sm">to</span>
+          <span class="text-steel text-sm">to</span>
 
-            <input
-              id="pMax"
-              type="number"
-              min="0"
-              placeholder="Max ETB"
-              class="w-28 rounded-xl border border-cool px-3 py-2 text-sm"
-            />
+          <input
+            id="pMax"
+            type="number"
+            min="0"
+            placeholder="Max ETB"
+            aria-label="Maximum price in ETB"
+            class="w-28 rounded-xl border border-cool px-3 py-2 text-sm"
+          />
 
-            <button id="pApply" class="chip on">Apply</button>
-          </div>
+          <button id="pApply" type="button" class="chip on">Apply</button>
         </div>
 
         <p id="resultInfo" class="text-xs text-steel"></p>
@@ -1021,7 +1037,7 @@
         });
       }
 
-      /* ---------- Menu items ---------- */
+      /* ---------- Menu cards with dynamic food/drink icons ---------- */
       function renderMenu() {
         const rows = filtered();
 
@@ -1058,7 +1074,10 @@
                         role="img"
                         aria-label="${k === "drink" ? "Drink" : "Food"}"
                       >
-                        <iconify-icon icon="${k === "drink" ? "lucide:cup-soda" : "lucide:utensils"}" aria-hidden="true"></iconify-icon>
+                        <iconify-icon
+                          icon="${k === "drink" ? "lucide:cup-soda" : "lucide:utensils"}"
+                          aria-hidden="true"
+                        ></iconify-icon>
                       </span>
 
                       <div class="flex-1">
@@ -1107,19 +1126,42 @@
         });
       }
 
-      /* ---------- Search and price controls: original functionality retained ---------- */
+      /* ---------- Collapsible search and price filters ---------- */
+      $("#searchToggle").onclick = () => {
+        const panel = $("#searchPanel");
+        const opening = panel.classList.contains("hidden");
+
+        panel.classList.toggle("hidden", !opening);
+        $("#searchToggle").classList.toggle("on", opening);
+
+        $("#searchToggle").setAttribute(
+          "aria-expanded",
+          String(opening)
+        );
+
+        $("#searchToggle").setAttribute(
+          "aria-label",
+          opening
+            ? "Hide search and price filters"
+            : "Show search and price filters"
+        );
+
+        if (opening) {
+          $("#q").focus();
+        }
+      };
+
       $("#q").oninput = (e) => {
         F.q = e.target.value;
         renderMenu();
       };
 
-      $("#priceBtn").onclick = () => {
-        $("#pricePanel").classList.toggle("hidden");
-      };
-
       $("#pApply").onclick = () => {
-        const min = $("#pMin").value === "" ? null : Number($("#pMin").value);
-        const max = $("#pMax").value === "" ? null : Number($("#pMax").value);
+        const min =
+          $("#pMin").value === "" ? null : Number($("#pMin").value);
+
+        const max =
+          $("#pMax").value === "" ? null : Number($("#pMax").value);
 
         F.min = min;
         F.max = max;
