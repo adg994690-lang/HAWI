@@ -29,6 +29,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
     <script>
@@ -65,6 +66,171 @@
       @keyframes toastUp { from{opacity:0; transform:translate(-50%,20px)} to{opacity:1; transform:translate(-50%,0)} }
       .toast { animation: toastUp .25s ease-out; }
       .kd { width: 1.6rem; height: 1.6rem; border-radius: 9999px; display: inline-grid; place-items: center; font-size: .68rem; font-weight: 900; }
+
+      /* ---------- fixed developer attribution ---------- */
+      .footer-attribution-row {
+        position: fixed;
+        right: max(12px, calc((100vw - 72rem) / 2 + 16px));
+        bottom: 8px;
+        z-index: 30;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        width: auto;
+        min-width: 0;
+        max-width: calc(100vw - 24px);
+      }
+
+      .footer-attribution-row .developer-attribution {
+        display: inline-flex;
+        width: fit-content;
+        max-width: 100%;
+        box-sizing: border-box;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 0;
+        margin: 0;
+        font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-size: 11px;
+        font-weight: 400;
+        color: #777777;
+        line-height: 1.25;
+        background: transparent;
+      }
+
+      .footer-attribution-row .developer-attribution > span {
+        min-width: 0;
+      }
+
+      .footer-attribution-row .brand-script {
+        font-family: 'Dancing Script', cursive;
+        font-size: 16px;
+        color: #111111;
+        font-weight: 700;
+        letter-spacing: .5px;
+        vertical-align: middle;
+      }
+
+      .footer-attribution-row .brand-divider {
+        color: #52525b;
+        margin: 0 3px;
+        font-weight: 300;
+      }
+
+      .footer-attribution-row .brand-tech {
+        color: #F97316;
+        font-weight: 700;
+        letter-spacing: -.2px;
+        vertical-align: middle;
+      }
+
+      .footer-attribution-row .eddy-mark {
+        display: inline-block;
+        width: 17px;
+        height: 17px;
+        flex-shrink: 0;
+        vertical-align: middle;
+      }
+
+      .footer-attribution-row .eddy-mark svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+        overflow: visible;
+      }
+
+      .footer-attribution-row .em-outline {
+        transform-box: view-box;
+        transform-origin: 60px 60px;
+        animation: em-cloud 4s ease-in-out infinite;
+      }
+
+      .footer-attribution-row .em-power {
+        transform-box: view-box;
+        transform-origin: 60px 60px;
+        animation: em-power 4s ease-in-out infinite;
+      }
+
+      .footer-attribution-row .em-shield {
+        transform-box: view-box;
+        transform-origin: 60px 60px;
+        opacity: 0;
+        animation: em-shield 4s ease-in-out infinite;
+      }
+
+      .footer-attribution-row .em-check {
+        stroke-dasharray: 55;
+        stroke-dashoffset: 55;
+        animation: em-check 4s ease-in-out infinite;
+      }
+
+      @keyframes em-cloud {
+        0%,12% { opacity: 1; transform: scale(1) rotate(0); }
+        30%,75% { opacity: 0; transform: scale(.65) rotate(-18deg); }
+        92%,100% { opacity: 1; transform: scale(1) rotate(0); }
+      }
+
+      @keyframes em-power {
+        0%,12% { opacity: 1; transform: translate(0,0) scale(1); }
+        22% { opacity: .9; transform: translate(0,9px) scale(.8); }
+        32%,75% { opacity: 0; transform: translate(0,15px) scale(.35); }
+        90%,100% { opacity: 1; transform: translate(0,0) scale(1); }
+      }
+
+      @keyframes em-shield {
+        0%,22% { opacity: 0; transform: scale(.55) rotate(-12deg); }
+        38% { opacity: 1; transform: scale(1.08) rotate(0); }
+        45%,76% { opacity: 1; transform: scale(1) rotate(0); }
+        92%,100% { opacity: 0; transform: scale(.7); }
+      }
+
+      @keyframes em-check {
+        0%,36% { stroke-dashoffset: 55; opacity: 0; }
+        40% { opacity: 1; stroke-dashoffset: 55; }
+        54%,76% { opacity: 1; stroke-dashoffset: 0; }
+        90%,100% { opacity: 0; stroke-dashoffset: 0; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .footer-attribution-row .eddy-mark * {
+          animation: none !important;
+        }
+        .footer-attribution-row .em-outline,
+        .footer-attribution-row .em-power {
+          display: none;
+        }
+        .footer-attribution-row .em-shield {
+          opacity: 1;
+        }
+        .footer-attribution-row .em-check {
+          opacity: 1;
+          stroke-dashoffset: 0;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .footer-attribution-row {
+          right: 8px;
+          bottom: 6px;
+          justify-content: flex-end;
+        }
+
+        .footer-attribution-row .developer-attribution {
+          gap: 4px;
+          font-size: 10px;
+          padding: 4px 0;
+        }
+
+        .footer-attribution-row .brand-script {
+          font-size: 15px;
+        }
+
+        .footer-attribution-row .eddy-mark {
+          width: 16px;
+          height: 16px;
+        }
+      }
     </style>
   </head>
   <body class="pb-24">
@@ -153,6 +319,29 @@
     </div>
 
     <div id="toasts" class="fixed z-[90] bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"></div>
+
+    <!-- EDDY TECH DEVELOPER ATTRIBUTION -->
+    <footer class="mx-auto w-full max-w-6xl px-4">
+      <div class="footer-attribution-row">
+        <div class="developer-attribution">
+          <span>Developed by
+            <strong class="brand-script">Three Creatives</strong>
+            <span class="brand-divider">|</span>
+            <strong class="brand-tech">EDDY TECH</strong>
+          </span>
+          <div class="eddy-mark" aria-label="EDDY TECH animated verification symbol">
+            <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+              <path class="em-outline" d="M43 69 H35 C24 69 19 61 22 51 C24 43 31 39 39 40 C42 26 54 19 66 23 C75 25 80 32 81 40 C91 41 97 49 95 58 C94 65 88 69 80 69 H76" fill="none" stroke="#111111" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+              <g class="em-power" fill="none" stroke="#111111" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M59 32 V54"/><path d="M49 45 A15 15 0 1 0 69 45"/>
+              </g>
+              <path class="em-shield" d="M60 17 L91 29 V53 C91 72 77 89 60 100 C43 89 29 72 29 53 V29 Z" fill="none" stroke="#111111" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path class="em-check" d="M43 57 L55 69 L78 44" fill="none" stroke="#111111" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </footer>
 
     <script>
       /* ---------- connection (same kitchen database as the manager app) ---------- */
